@@ -2,7 +2,7 @@
   <H1>
     Winterstorm risk prediction via machine learning methods
   </H1>
-  Тип научной работы<br><br>
+  
   Корнилов Никита Максимович
 </div><br>
 <div align="center">
