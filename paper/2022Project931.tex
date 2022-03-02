@@ -89,7 +89,7 @@ Further for the sake of convenience, index $(i)$ will be omitted.
 \subsection{Model}
 Prediction model is model Memory module, attention mechanism  from \cite{EVL:1} , but ordinary GRU blocks are replaced by GRU blocks with convolutions layers from CNN model in order to work with spacial grid similar with work \cite{LSTMCNN:2}, \cite{GRUCNN:3}
 
-$ \text{There_will_be_short_reminder_of_article_\cite{EVL:1} }$ 
+
 \subsubsection{Memory module}
 For reach step $t$ model randomly samples $M$ windows from dataset with length $\Delta$. 
 $$w_j= (x_{t_j}, \dots, x_{t_j + \Delta}), 0< t_j < t - \Delta$$
