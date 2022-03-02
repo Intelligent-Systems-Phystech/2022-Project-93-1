@@ -16,7 +16,8 @@
 
 
 
-\title{Winterstorm risk prediction via machine learning methods}
+
+\title{Winterstorm risk prediction via deep learning methods}
 
 \author{ Kornilov Nikita\\
 	Department of Control and Applied Mathematics\\
@@ -40,7 +41,7 @@
 }
 \date{}
 
-\renewcommand{\shorttitle}{\textit{arXiv} Template}
+\renewcommand{\shorttitle}{Winterstorms}
 
 %%% Add PDF metadata to help others organize their library
 %%% Once the PDF is generated, you can check the metadata with
@@ -56,30 +57,82 @@ pdfkeywords={Maximum risk prediction},
 \maketitle
 
 \begin{abstract}
-	В статье рассматривается задача прогнозирование рисков суровых снежных бурь по климатическим данным с 1991 года в краткосрочном диапазоне до 20 лет. При этом прогнозирование производится на пространственной сетке большого размера. Для прикладных нужд необходимо достаточно точно прогнозировать экстремальные значения риска, представляющие на практике основной интерес, в то время как в области малых значений временного ряда алгоритм может совершать существенное число ошибок.
+	In article problem of  harsh winterstorm prediction in short-term period is observed. This prediction is computed in large spacial grid. For practical needs model must accurately predict extreme events meanwhile on ordinary events it can make big number of mistakes. 
 \end{abstract}
 
 
-\keywords{Maximum risk prediction}
+\keywords{Maximum risk prediction, GRU-CNN models, extreme events theory }
 
 \section{Introduction}
+Extreme natural events and disasters are serious and relevant problem for every country. Having information about upcoming events, companies can better prepare, survive and recover much faster after it. 
+
+Researches in this area are attempting to predict location and time of future harsh natural event using climate data that was collected during last decades. Especially, most dangerous and rare events are called extreme. Their prediction is much harder because of lack of information and unique patterns.
+
+In work \cite{LSTMCNN:2} was proposed method to predict events in spacial grid using combination of LSTM and CNN  neural networks architectures. Then, work \cite{EVL:1} showed progress in extreme events prediction proposing new models and loss functions based on extreme events theory that considered unique features of .
+
+Current task is to build model for short-term (up  to 20 years) prediction of winterstorms in North America using geodata from 1991 year about snow storms in this region. The data is partially very noised and inaccurate with spacial grid. 
+
+In this article we expand extreme events prediction adding important spacial components to up-to-date methods. Also we $\text{try}$ to consider geographical area features. We combine together Recurrent Neural Networks architectures with CNN and state-of-the-art models for extreme events prediction.
+
+Goal of research is to fit model with comparable quality to models from related works, that after can be used for other regions.
+ 
+\section{Problem statement}
+The extreme events prediction problem with spacial components is both time series prediction and spacial problems. Considering this combination the formalization of problem.
+\subsection{Formalization}
+
+
+Let there are $N$ time sequences with length $T$ on space grid $S  \subset \mathbb{R}^2$. Then $i$-th sequence can be described as
+$$ (S , X^{(i)}_{1:T} , Y_{1:T}^{(i)}, V_{1:T}^{(i)}) =\{ (s, x^{(i)}_j,y^{(i)}_j, v^{(i)}_j) : s \in S , j \in \overline{1,T} \}$$  
+where $(s,x_j) \in \mathbb{R}^2 \times \mathbb{R}^{h}$ , $(s,y_j) \in \mathbb{R}^2 \times \mathbb{R}^{h}$ are input variables  and  are predictable variables at $j$-th moment of time in $s$ element of grid $S$  respectively. Necessary condition of alignment in prediction is $y_t^{(i)} = x_{t+1}^{(i)}$. $(s, v_j^{(i)})$ is special indicator of extreme event, where $v_j^{(i)} \in \{0,1\}$ and $1$ means event has happened, $0$ otherwise.
+Further for the sake of convenience, index $(i)$ will be omitted.
+
+\subsection{Model}
+Prediction model is model Memory module, attention mechanism  from \cite{EVL:1} , but ordinary GRU blocks are replaced by GRU blocks with convolutions layers from CNN model in order to work with spacial grid similar with work \cite{LSTMCNN:2}, \cite{GRUCNN:3}
+
+$ \text{There_will_be_short_reminder_of_article_\cite{EVL:1} }$ 
+\subsubsection{Memory module}
+For reach step $t$ model randomly samples $M$ windows from dataset with length $\Delta$. 
+$$w_j= (x_{t_j}, \dots, x_{t_j + \Delta}), 0< t_j < t - \Delta$$
+$M, \Delta$ are hyperparameters.
+Then for each window $w_j$ GRU-CNN block is appliyed $GRU-CNN(w_j) = h_j$. Meanwhile, in training training model stores true extreme indicators $q_j = v_{t_j + \Delta + 1}$.
+\subsubsection{Attention module}
+
+$X_{1:T}, \{h_j\}_{j=1}^M$ is module input. $X_{1:T}$ passes through the same GRU-CNN block. 
+
+$$\hat{o}_t = CNN(h_t) + b_0, h_t = GRU-CNN(X_{1:T})$$
+
+Then model computes $v'_t$ using linear transformation $h_j$ and $h_X$ - embedding from $X_{1:T}$ input.
+
+Finally, $o_t = \hat{o}_t + bv'_t$, where $b \in \mathbb{R}^H$ - trainable parameter.
+\subsusection{Loss function and optimization problem }
+
+Let $O$ is prediction model. It's input $(S,X_{1:T})$, output $O((S, X_{1:T})) = (S,Y'_{1:T}, V'_{1:T})$ and true values are $(S, Y_{1:T}, V_{1:T})$. In particular, $o_t$ - model output at moment $t$. 
+
+In order to predict extreme events in \cite{EVL:1} was proposed special loss-function called Extreme Value Loss or EVL. 
+$$EVL(v'_t,v_t) = -\beta_0 \left[ 1 - \frac{v_t}{\gamma}\right]^\gamma v_t\log(v_t) -\beta_1 \left[ 1 - \frac{1 - v'_t}{\gamma}\right]^\gamma (1-v'_t)\log(1 - v'_t) $$ where $\beta_0 = Pr(v_t = 0 )$ - probability of event to be normal or proportion of normal events in dataset and $\beta_1 = Pr(v_t= 1)$- proportion of extreme events.
+
+Then loss function  consists of two functions. 
+
+The first one, for extreme event classification error and time-series prediction of $Y_{1:T}$ to improve GRU-CNN blocks in attention module.
+
+$$L_1(O, S, X_{1:T}, Y_{1:T},V_{1:T} ) = \sum \limits_{s\in S}\left[ \sum\limits_{t=1}^T ||o_t - y_t||^2 +  \lambda_1 EVL(v'_t, v_t
+)\right]$$
+This function optimizes after $T$ batch.
+
+The second for enchancement of GRU-CNN modules in  memory module:
+
+$L_2(O, S, X_{1:T}, Y_{1:T},V_{1:T} ) = \sum \limits_{s\in S}\left[ \sum\limits_{t=1}^T \sum \limits_{j=1}^M EVL(p_j,q_j)\right]$$
+
+where $p_j \in [0,1]$ is computed from $j$-th window hidden representation output $h_j$ , which was passed through fully-connected CNN layer. This function optimizes before $v'_t$ computation and after Memory module phase.
+
+Optimizer for fitting is Adam.
 
 
 
-\section{Headings: first level}
-
-\subsection{Citations}
-
-\subsection{Figures}
 
 
-\subsection{Tables}
-
-\subsection{Lists}
-
-
-
-\bibliographystyle{unsrtnat}
-\bibliography{references}
+\newpage
+\bibliographystyle{ieeetr}
+\bibliography{Kornilov2022Winterstorm}
 
 \end{document}
