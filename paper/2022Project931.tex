@@ -146,7 +146,7 @@ During running experiment model passed $380$ epochs in Adam optimizer with reduc
 Fitting results are showed below. 
 \begin{figure}[h!] 
 \centering
-\includegraphics[width=90mm]{pre_graph.png}
+\includegraphics[width=90mm]{conv_graph.png}
 \caption{ Basic LSTM CNN model fitting\label{overflow}}
 \end{figure}
 
@@ -156,7 +156,7 @@ Train error gradually reduces at high rate. That can also be seen in predicted p
 
 \begin{figure}[h] 
 \centering
-\includegraphics[height=3cm]{example.png}
+\includegraphics[height=3cm]{train pred.png}
 \caption{ Train prediction\label{overflow}}
 \end{figure}
 
@@ -170,6 +170,15 @@ Train error gradually reduces at high rate. That can also be seen in predicted p
 Such difference between train and data can be explain with simplicity of basic model when climate changes connections are extremely difficult to build up. However, basic model gives logical and appropriate results. 
 
 
+\subsection{List of expected figures and tables}
+\begin{itemize}
+    \item Several figures with predicted climate variables and real ones. Figure is the two same maps from real world with predicted and real heat-maps on the top layer. It will demonstrate quality of prediction.
+    \item Table with loss function final errors and F1 or other scores of extreme event classification for at least one model with different hyperparameters and training methods. It will demonstrate which  approach turned out to be the best.
+    \item Figure with heat maps predicted by different models. Can be on graph or composed closely together. That will demonstrate influence of classification part of loss function.
+    \item Figure of distribution of error on dataset will demonstrate absent of large errors and  number of small errors. Fact that our model will be tuned on extreme prediction.
+    
+    
+\end{itemize}
 
 \pagebreak
 \bibliographystyle{plain}
