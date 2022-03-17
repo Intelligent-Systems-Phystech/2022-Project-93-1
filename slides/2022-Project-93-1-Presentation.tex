@@ -39,15 +39,15 @@
 %-----------------------------------------------------------------------------------------------------
 \begin{frame}{One-slide talk}
 \begin{columns}
-\column{0.4\textwidth}
-\qquad $(24, 64)$ class and feature maps example
+\column{0.5\textwidth}
+\qquad $(24, 64)$ class and feature maps example $v_t,y_t$
 \column{0.8\textwidth}
 \includegraphics[width=0.5\textwidth]{fig/image sample.png}
 \end{columns}
 
 \textbf{Goal: predict both maps in time t} 
 
-Model structure 
+Model with $M$ windows 
 \begin{columns}[c]
 \column{0.5\textwidth}
 \includegraphics[width=0.7\textwidth]{fig/memory module.png}
@@ -63,12 +63,12 @@ Model structure
 \bigskip
 
 
- $\textit{EVL}(u_t,v_t) = -\beta_0 \left( 1 - \frac{u_t}{\gamma}\right)^\gamma v_t\log(u_t) $  
- $ -\beta_1 \left( 1 - \frac{1 - u_t}{\gamma}\right)^\gamma (1-v_t)\log(1 - u_t) $ 
+ $\textit{EVL}(u_t,v_t) =\sum\limits_{s\in S} -\beta_0 \left( 1 - \frac{u_{st}}{\gamma}\right)^\gamma v_t\log(u_{st}) $  
+ $ -\beta_1 \left( 1 - \frac{1 - u_{st}}{\gamma}\right)^\gamma (1-v_{st})\log(1 - u_{st}) $ 
 
 
 \bigskip
-\qquad $\beta_i = Pr(v_t = i ),  i \in \{0,1\}$
+\qquad $\beta_i = Pr(v_t = i ),  i \in \{0,1\}; S$ -map
 \column{0.4\textwidth} 
 Total loss
 
